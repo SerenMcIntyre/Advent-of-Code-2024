@@ -1,6 +1,3 @@
-import gleam/dict
-import gleam/int
-import gleam/io
 import gleam/list
 import gleam/order
 import gleam/string
@@ -24,6 +21,27 @@ pub fn read_as_lines(path: String) -> List(String) {
       |> string.trim
       |> string.split("\n")
     Error(_) -> []
+  }
+}
+
+pub fn read_characters(path: String) -> List(String) {
+  let input = simplifile.read(path)
+  case input {
+    Ok(input) ->
+      input
+      |> string.trim
+      |> string.to_graphemes
+    Error(_) -> []
+  }
+}
+
+pub fn read_single_line(path: String) -> String {
+  let input = simplifile.read(path)
+  case input {
+    Ok(input) ->
+      input
+      |> string.trim
+    Error(_) -> ""
   }
 }
 
