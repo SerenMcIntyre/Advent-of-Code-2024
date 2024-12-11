@@ -1,4 +1,5 @@
 // import day8
+import day10
 import day9
 
 // import day1
@@ -26,5 +27,6 @@ pub fn main() {
   // day7.part2()
   // day8.part1()
   // day9.part1()
-  day9.part2()
+  // day9.part2()
+  day10.part2()
 }
