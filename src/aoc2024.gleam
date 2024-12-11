@@ -1,6 +1,8 @@
 // import day8
 import day10
+import day11
 import day9
+import pocket_watch
 
 // import day1
 // import day2
@@ -11,6 +13,7 @@ import day9
 // import day7
 
 pub fn main() {
+  use <- pocket_watch.simple("test 1")
   // day1.part1()
   // day1.part2()
   // day2.part1()
@@ -28,5 +31,6 @@ pub fn main() {
   // day8.part1()
   // day9.part1()
   // day9.part2()
-  day10.part2()
+  // day10.part2()
+  day11.part1()
 }

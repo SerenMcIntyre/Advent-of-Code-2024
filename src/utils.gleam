@@ -24,6 +24,17 @@ pub fn read_as_lines(path: String) -> List(String) {
   }
 }
 
+pub fn read_words(path: String) -> List(String) {
+  let input = simplifile.read(path)
+  case input {
+    Ok(input) ->
+      input
+      |> string.trim
+      |> string.split(" ")
+    Error(_) -> []
+  }
+}
+
 pub fn read_characters(path: String) -> List(String) {
   let input = simplifile.read(path)
   case input {
