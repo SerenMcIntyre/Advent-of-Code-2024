@@ -1,21 +1,9 @@
-import gacache
-import gleam/dict
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/result
 import gleam/string
+import rememo/memo
 import utils
-
-pub fn rule_zero(stone: String, cache, n: Int) {
-  case gacache.get(cache, stone <> "_" <> int.to_string(n)) {
-    Ok(value) -> {
-      io.debug("Cache hit")
-      Ok(value)
-    }
-    Error(_) -> Error(Nil)
-  }
-}
 
 pub fn rule_two(stone: String) -> Result(List(String), Nil) {
   let digits = string.length(stone)
@@ -42,8 +30,6 @@ pub fn rule_three(stone: String) -> Result(List(String), Nil) {
 pub fn apply_rules_until_match(
   stone: String,
   rules: List(fn(String) -> Result(List(String), Nil)),
-  cache,
-  n: Int,
 ) -> List(String) {
   case rules {
     [] -> [stone]
@@ -53,7 +39,7 @@ pub fn apply_rules_until_match(
         Ok(new_stones) -> {
           new_stones
         }
-        Error(_) -> apply_rules_until_match(stone, rules, cache, n)
+        Error(_) -> apply_rules_until_match(stone, rules)
       }
     }
   }
@@ -61,23 +47,20 @@ pub fn apply_rules_until_match(
 
 pub fn blink_once(
   stone: String,
-  cache,
   rules: List(fn(String) -> Result(List(String), Nil)),
-  n: Int,
 ) -> List(String) {
   case stone {
     "0" -> ["1"]
-    _ -> apply_rules_until_match(stone, rules, cache, n)
+    _ -> apply_rules_until_match(stone, rules)
   }
 }
 
 pub fn manual_blink(stone, cache, rules, n) {
   let stones =
-    blink_once(stone, cache, rules, n)
+    blink_once(stone, rules)
     |> list.map(fn(stone) { blink_n_times(stone, n - 1, cache, rules) })
     |> list.flatten
 
-  gacache.set(cache, stone <> "_" <> int.to_string(n), stones)
   stones
 }
 
@@ -87,19 +70,10 @@ pub fn blink_n_times(
   cache,
   rules: List(fn(String) -> Result(List(String), Nil)),
 ) -> List(String) {
+  use <- memo.memoize(cache, #(stone, n))
   case n {
     0 -> [stone]
-    _ -> {
-      // case n > 30 {
-      // True -> manual_blink(stone, cache, rules, n)
-      // False -> {
-      case gacache.get(cache, stone <> "_" <> int.to_string(n)) {
-        Ok(value) -> value
-        Error(_) -> manual_blink(stone, cache, rules, n)
-      }
-      //   }
-      // }
-    }
+    _ -> manual_blink(stone, cache, rules, n)
   }
 }
 
@@ -108,7 +82,7 @@ pub fn start_blinking(stones: List(String), cache) {
     [] -> []
     [stone, ..stones] -> {
       io.debug(stone)
-      let blinked = blink_n_times(stone, 75, cache, [rule_two, rule_three])
+      let blinked = blink_n_times(stone, 55, cache, [rule_two, rule_three])
       [blinked, ..start_blinking(stones, cache)]
     }
   }
@@ -117,7 +91,7 @@ pub fn start_blinking(stones: List(String), cache) {
 pub fn part1() {
   let stones = utils.read_words("src/input/day11.txt")
 
-  let assert Ok(cache) = gacache.start()
+  use cache <- memo.create()
 
   start_blinking(stones, cache)
   |> list.flatten
