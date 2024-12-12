@@ -1,5 +1,7 @@
+import gleam/int
 import gleam/list
 import gleam/order
+import gleam/result
 import gleam/string
 import simplifile
 
@@ -24,13 +26,15 @@ pub fn read_as_lines(path: String) -> List(String) {
   }
 }
 
-pub fn read_words(path: String) -> List(String) {
+pub fn read_numbers(path: String) -> List(Int) {
   let input = simplifile.read(path)
   case input {
     Ok(input) ->
       input
       |> string.trim
       |> string.split(" ")
+      |> list.map(fn(s) { result.unwrap(int.parse(s), 0) })
+
     Error(_) -> []
   }
 }
