@@ -1,6 +1,6 @@
 import gleam/io
 import gleam/list
-import utils.{type Axis, type Matrix, type Point}
+import utils.{type Matrix, type Point}
 
 type Plot =
   List(Point)
