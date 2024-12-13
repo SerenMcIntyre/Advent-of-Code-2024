@@ -1,17 +1,17 @@
-import gleam/int
 import gleam/io
 import gleam/list
 import gleam/set
-import gleam/string
-import simplifile
 import utils.{type Direction, type Point}
 
 pub fn tweens(start: Point, end: Point, free_spaces: List(Point)) -> List(Point) {
   let ascending = start.1 < end.1 || start.2 < end.2
-  let is_x_move = start.1 != end.1
+  let axis = case start.1 != end.1 {
+    True -> utils.X
+    False -> utils.Y
+  }
 
-  case is_x_move {
-    True ->
+  case axis {
+    utils.X ->
       list.filter(free_spaces, fn(point) {
         let #(_, x, y) = point
         y == start.2
@@ -20,7 +20,7 @@ pub fn tweens(start: Point, end: Point, free_spaces: List(Point)) -> List(Point)
           False -> x >= end.1 && x <= start.1
         }
       })
-    False ->
+    utils.Y ->
       list.filter(free_spaces, fn(point) {
         let #(_, x, y) = point
         x == start.1
@@ -30,19 +30,23 @@ pub fn tweens(start: Point, end: Point, free_spaces: List(Point)) -> List(Point)
         }
       })
   }
-  |> list.sort(fn(a, b) { utils.point_compare(a, b, is_x_move, ascending) })
+  |> list.sort(fn(a, b) { utils.point_compare(a, b, axis, ascending) })
 }
 
 pub fn next_obstacle(guard: #(Point, Direction), obstacles: List(Point)) {
   let #(start, dir) = guard
   let #(xmove, increasing) = dir
+  let xmove = case xmove {
+    True -> utils.X
+    False -> utils.Y
+  }
   let obstacles =
     list.sort(obstacles, fn(a, b) {
       utils.point_compare(a, b, xmove, increasing)
     })
 
   case xmove {
-    True ->
+    utils.X ->
       list.find(obstacles, fn(point) {
         point.2 == start.2
         && case increasing {
@@ -50,7 +54,7 @@ pub fn next_obstacle(guard: #(Point, Direction), obstacles: List(Point)) {
           False -> point.1 < start.1
         }
       })
-    False -> {
+    utils.Y -> {
       list.find(obstacles, fn(point) {
         point.1 == start.1
         && case increasing {

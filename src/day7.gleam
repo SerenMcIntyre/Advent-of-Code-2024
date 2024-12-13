@@ -71,12 +71,11 @@ pub fn part2() {
     utils.read_as_lines("src/input/day7.txt")
     |> list.map(fn(line) { split(line) })
 
-  let res =
-    input
-    |> list.filter(fn(eq) { dig3(0, eq.1, eq.0) })
-    // res
-    // |> list.each(fn(eq) { io.debug(eq) })
-    // res
-    |> list.fold(0, fn(acc, eq) { acc + eq.0 })
-    |> io.debug
+  input
+  |> list.filter(fn(eq) { dig3(0, eq.1, eq.0) })
+  // res
+  // |> list.each(fn(eq) { io.debug(eq) })
+  // res
+  |> list.fold(0, fn(acc, eq) { acc + eq.0 })
+  |> io.debug
 }
