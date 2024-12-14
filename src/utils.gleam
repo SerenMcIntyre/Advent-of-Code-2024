@@ -1,6 +1,8 @@
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/order
+import gleam/regexp
 import gleam/result
 import gleam/string
 import simplifile
@@ -169,5 +171,14 @@ pub fn adjacent_points(
       }
     }
     && predicate(compare_point)
+  })
+}
+
+pub fn extract_all_numbers(text: String) {
+  let assert Ok(re) = regexp.from_string("-?\\d+")
+  regexp.scan(with: re, content: text)
+  |> list.map(fn(match) {
+    let assert Ok(i) = int.parse(match.content)
+    i
   })
 }
