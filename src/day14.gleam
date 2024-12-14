@@ -105,19 +105,31 @@ pub fn draw(robots: List(Position), i: Int, bounds: #(Int, Int)) {
   io.println(int.to_string(i))
 }
 
+fn get_touching_robots(robots: List(Position)) {
+  list.filter(robots, fn(point) {
+    list.any(robots, fn(compare_point) {
+      { compare_point.0 == point.0 + 1 || compare_point.0 == point.0 - 1 }
+      && { compare_point.1 == point.1 + 1 || compare_point.1 == point.1 - 1 }
+    })
+  })
+}
+
 pub fn part2() {
   let input = utils.read_as_lines("src/input/day14.txt")
 
   let bounds = #(101, 103)
-  let seconds = 100
-  list.range(1, 20)
-  |> list.each(fn(i) {
-    process.sleep(400)
-    input
-    |> list.map(fn(line) {
-      parse_robot(line)
-      |> move(seconds, bounds)
-    })
-    |> draw(i, bounds)
+  list.range(1, 20_000)
+  |> list.map(fn(i) {
+    let state =
+      input
+      |> list.map(fn(line) {
+        parse_robot(line)
+        |> move(i, bounds)
+      })
+    // draw(state, i, bounds)
+    #(i, list.length(get_touching_robots(state)))
   })
+  |> list.sort(fn(a, b) { int.compare(a.1, b.1) })
+  |> io.debug
 }
+/// Just like... find the biggest number of touching robots then draw the state and verify that it's christmas
