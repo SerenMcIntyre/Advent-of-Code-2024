@@ -115,10 +115,12 @@ fn get_touching_robots(robots: List(Position)) {
 }
 
 pub fn part2() {
-  let input = utils.read_as_lines("src/input/day14.txt")
+  let input = utils.read_as_lines("src/input/day14_bonus.txt")
 
   let bounds = #(101, 103)
-  list.range(1, 20_000)
+  // list.range(1, 20_000)
+  //#(16642, 96), #(19835, 96), #(368, 97), #(3973, 97), #(4848, 97), #(10771, 97), #(14376, 97), #(15251, 97), #(2020, 98), #(4797, 98), #(7878, 98), #(12423, 98), #(15200, 98), #(18281, 98), #(7475, 99), #(17878, 99), #(4282, 101), #(14685, 101), #(3149, 102), #(13552, 102), #(7373, 103), #(17776, 103), #(7372, 115), #(17775, 115), #(2222, 140), #(12625, 140)]
+  [2222]
   |> list.map(fn(i) {
     let state =
       input
@@ -126,7 +128,7 @@ pub fn part2() {
         parse_robot(line)
         |> move(i, bounds)
       })
-    // draw(state, i, bounds)
+    draw(state, i, bounds)
     #(i, list.length(get_touching_robots(state)))
   })
   |> list.sort(fn(a, b) { int.compare(a.1, b.1) })

@@ -17,6 +17,9 @@ pub type Direction =
 pub type Point =
   #(String, Int, Int)
 
+pub type Coordinate =
+  #(Int, Int)
+
 pub type Axis {
   X
   Y
@@ -181,4 +184,15 @@ pub fn extract_all_numbers(text: String) {
     let assert Ok(i) = int.parse(match.content)
     i
   })
+}
+
+pub fn add(p1: Coordinate, p2: Coordinate) -> Coordinate {
+  #(p1.0 + p2.0, p1.1 + p2.1)
+}
+
+pub fn within(point: Coordinate, bounds: Coordinate) -> Bool {
+  let #(x, y) = point
+  let #(min_x, min_y) = bounds
+  let #(max_x, max_y) = bounds
+  x >= min_x && x <= max_x && y >= min_y && y <= max_y
 }
