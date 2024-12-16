@@ -177,7 +177,7 @@ pub fn part1() {
 
   let final_state = process_moves(robot, obstacles, instructions)
 
-  let #(final_robot, final_obstacles) = final_state
+  let #(_final_robot, final_obstacles) = final_state
   final_obstacles
   |> list.filter(fn(o) { o.0 == "O" })
   |> list.map(fn(o) { score(#(o.1, o.2)) })
