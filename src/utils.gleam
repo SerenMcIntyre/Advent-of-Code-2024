@@ -1,5 +1,6 @@
 import gleam/int
 import gleam/list
+import gleam/option.{type Option, None, Some}
 import gleam/order
 import gleam/regexp
 import gleam/result
@@ -9,6 +10,12 @@ import simplifile
 pub type Matrix =
   List(Point)
 
+pub type Node =
+  #(Coordinate, Option(Int), List(Coordinate))
+
+pub type DirectedNode =
+  #(#(Coordinate, Velocity), Option(Int), List(#(Coordinate, Velocity, Int)))
+
 // #(Is_X, Is_Increasing)
 pub type Direction =
   #(Bool, Bool)
@@ -17,6 +24,9 @@ pub type Point =
   #(String, Int, Int)
 
 pub type Coordinate =
+  #(Int, Int)
+
+pub type Velocity =
   #(Int, Int)
 
 pub type Axis {
@@ -87,6 +97,19 @@ pub fn convert_to_psuedo_matrix(rows: List(String)) -> Matrix {
   |> list.flatten
 }
 
+pub fn convert_to_graph(matrix: Matrix, predicate predicate: fn(Point) -> Bool) {
+  matrix
+  |> list.filter(predicate)
+  |> list.map(fn(item) {
+    #(
+      #(item.1, item.2),
+      option.None,
+      adjacent_points(point: item, matrix:, predicate:)
+        |> list.map(fn(i) { #(i.1, i.2) }),
+    )
+  })
+}
+
 pub fn point_at(x: Int, y: Int, matrix: Matrix) {
   matrix
   |> list.find(fn(point) { point.1 == x && point.2 == y })
@@ -127,6 +150,18 @@ pub fn point_compare(p1: Point, p2: Point, axis: Axis, asc: Bool) {
   }
 }
 
+pub fn coord_compare(a: Coordinate, b: Coordinate) {
+  case a.0 != b.0 {
+    True -> int.compare(a.0, b.0)
+    False -> {
+      case a.1 != b.1 {
+        True -> int.compare(a.1, b.1)
+        False -> order.Eq
+      }
+    }
+  }
+}
+
 pub fn matrix_end(matrix: Matrix) -> Point {
   let assert Ok(max_x) =
     list.sort(matrix, fn(a, b) { point_compare(a, b, X, True) })
@@ -156,9 +191,9 @@ pub fn write_matrix_to_file(matrix: Matrix, path: String) {
 }
 
 pub fn adjacent_points(
-  point: Point,
-  matrix: Matrix,
-  predicate: fn(Point) -> Bool,
+  point point: Point,
+  matrix matrix: Matrix,
+  predicate predicate: fn(Point) -> Bool,
 ) {
   matrix
   |> list.filter(fn(compare_point) {
@@ -189,9 +224,47 @@ pub fn add(p1: Coordinate, p2: Coordinate) -> Coordinate {
   #(p1.0 + p2.0, p1.1 + p2.1)
 }
 
+pub fn test_valid_move(
+  point: Coordinate,
+  dir: Velocity,
+  map: Matrix,
+  blocklist: List(String),
+) -> Result(Coordinate, Nil) {
+  let #(x, y) = add(point, dir)
+  case
+    list.any(map, fn(cell) {
+      cell.1 == x && cell.2 == y && list.contains(blocklist, cell.0)
+    })
+  {
+    True -> Error(Nil)
+    False -> Ok(#(x, y))
+  }
+}
+
 pub fn within(point: Coordinate, bounds: Coordinate) -> Bool {
   let #(x, y) = point
   let #(min_x, min_y) = bounds
   let #(max_x, max_y) = bounds
   x >= min_x && x <= max_x && y >= min_y && y <= max_y
+}
+
+pub fn select_smallest_graph_member(
+  graph: List(DirectedNode),
+  visited: List(#(Coordinate, Velocity)),
+) {
+  list.filter(graph, fn(node) {
+    case list.find(visited, fn(node2) { node.0 == node2 }) {
+      Ok(_) -> False
+      Error(Nil) -> True
+    }
+  })
+  |> list.sort(fn(a, b) {
+    case a.1, b.1 {
+      Some(a), Some(b) -> int.compare(a, b)
+      None, None -> order.Eq
+      Some(_), None -> order.Lt
+      None, Some(_) -> order.Gt
+    }
+  })
+  |> list.first
 }
